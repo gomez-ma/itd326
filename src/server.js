@@ -1,15 +1,22 @@
-require("dotenv").config();
-const app = require("./app");
-const PORT = process.env.PORT || 5000;
+const app = require("./app.js");
+const { prisma } = require("./config/database.js");
 
-app.listen(PORT, () => {
-  console.log(`
-========================================
- Member API Access System
-========================================
- Environment : ${process.env.NODE_ENV || "development"}
- Port        : ${PORT}
- URL         : http://localhost:${PORT}
-========================================
-  `);
-});
+const PORT = process.env.PORT || 3000;
+
+async function startServer() {
+  try {
+    await prisma.$connect();
+
+    console.log("Connected to PostgreSQL.");
+
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+  } catch (error) {
+    console.error("Failed to connect to PostgreSQL.");
+    console.error(error);
+    process.exit(1);
+  }
+}
+
+startServer();

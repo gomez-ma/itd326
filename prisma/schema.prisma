@@ -1,0 +1,110 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+
+// ============================================================
+// Member
+// ============================================================
+
+model Member {
+  id           Int        @id @default(autoincrement())
+  email        String     @unique
+  passwordHash String
+  name         String
+  role         String     @default("member")
+  isActive     Boolean    @default(true)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  apiTokens    ApiToken[]
+  apiLogs      ApiLog[]
+
+  @@map("members")
+}
+
+
+// ============================================================
+// API Token
+// ============================================================
+
+model ApiToken {
+  id          Int       @id @default(autoincrement())
+  name        String
+  tokenHash   String    @unique
+  memberId    Int
+  expiresAt   DateTime?
+  lastUsedAt  DateTime?
+  revokedAt   DateTime?
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  member      Member    @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  apiLogs     ApiLog[]
+
+  @@index([memberId])
+  @@index([isActive])
+  @@map("api_tokens")
+}
+
+
+// ============================================================
+// Product
+// ============================================================
+
+model Product {
+  id          Int       @id @default(autoincrement())
+
+  name        String
+  description String?
+
+  price       Decimal   @db.Decimal(12, 2)
+
+  isActive    Boolean   @default(true)
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([isActive])
+  @@map("products")
+}
+
+
+// ============================================================
+// API Log
+// ============================================================
+
+model ApiLog {
+  id            Int       @id @default(autoincrement())
+
+  memberId      Int?
+  tokenId       Int?
+
+  method        String
+  endpoint      String
+
+  statusCode    Int
+
+  ipAddress     String?
+  userAgent     String?
+
+  responseTime  Int?
+
+  createdAt     DateTime  @default(now())
+
+  member        Member?   @relation(fields: [memberId], references: [id], onDelete: SetNull)
+
+  token         ApiToken? @relation(fields: [tokenId], references: [id], onDelete: SetNull)
+
+  @@index([memberId])
+  @@index([tokenId])
+  @@index([createdAt])
+  @@index([statusCode])
+  @@map("api_logs")
+}

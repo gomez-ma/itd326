@@ -1,8 +1,14 @@
-/**
- * Database configuration
- *
- * Prisma database connection will be initialized here
- * in Step 2.
- */
+require("dotenv").config();
 
-module.exports = {};
+const { PrismaPg } = require("@prisma/adapter-pg");
+const { PrismaClient } = require("@prisma/client");
+
+const adapter = new PrismaPg({
+  connectionString: process.env.DATABASE_URL,
+});
+
+const prisma = new PrismaClient({
+  adapter,
+});
+
+module.exports = { prisma };
