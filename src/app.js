@@ -2,6 +2,7 @@ const express = require("express");
 const helmet = require("helmet");
 const cors = require("cors");
 const morgan = require("morgan");
+const errorHandler = require("./middleware/errorHandler");
 
 const app = express();
 
@@ -17,5 +18,7 @@ app.get("/", (req, res) => {
     message: "Member API Access System",
   });
 });
+
+app.use(errorHandler);
 
 module.exports = app;
